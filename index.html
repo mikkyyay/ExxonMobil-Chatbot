@@ -10,6 +10,7 @@
         align-items: center;
         min-height: 100vh;
         background-color: #f0f0f0;
+        margin: 0;
       }
 
       #chat-container {
@@ -17,7 +18,10 @@
         border-radius: 10px;
         padding: 20px;
         box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-        width: 700px;
+        width: 900px;
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
       }
 
       h1 {
@@ -26,28 +30,44 @@
       }
 
       #chat-history {
-        height: 500px;
-        overflow-y: scroll;
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+
+      .message-wrapper {
+        display: flex;
+        margin-bottom: 5px;
+      }
+
+      .user-message-wrapper {
+        justify-content: flex-end;
+      }
+
+      .bot-message-wrapper {
+        justify-content: flex-start;
+      }
+
+      .user-message,
+      .bot-message {
+        max-width: 80%;
+        padding: 10px;
+        border-radius: 10px;
+        word-wrap: break-word;
+        display: inline-block;
       }
 
       .user-message {
-        text-align: right;
-        padding: 10px;
         background-color: #f0f0f0;
-        border-radius: 10px;
-        margin-bottom: 5px;
       }
 
       .bot-message {
-        text-align: left;
-        padding: 10px;
-        background-color: #e0f0e0;
-        border-radius: 10px;
-        margin-bottom: 5px;
+        background-color: #cad2ef;
       }
 
       form {
         display: flex;
+        margin-top: 20px;
       }
 
       input {
@@ -59,13 +79,14 @@
       }
 
       button {
-        background-color: #4caf50;
+        background-color: #213470;
         color: white;
         border: none;
         padding: 10px 15px;
         border-radius: 5px;
         cursor: pointer;
       }
+
       #loader {
         display: none; /* Hide by default */
         position: absolute;
@@ -92,6 +113,14 @@
       const userInput = document.getElementById("user-input");
       const form = document.getElementById("chat-form");
 
+      function convertMarkdownToHTML(markdown) {
+        let html = markdown
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold
+          .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italics
+          .replace(/\n/g, "<br>"); // Newline
+        return html;
+      }
+
       async function sendMessage() {
         const userMessage = userInput.value;
         userInput.value = ""; // Clear input field
@@ -107,11 +136,11 @@
 
           const data = await response.json();
           console.log(data);
-          const botMessage = data.response;
+          const botMessage = convertMarkdownToHTML(data.response.trim());
           console.log(botMessage);
           // Add chat message to the chat history
-          chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
-          chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+          chatHistory.innerHTML += `<div class="message-wrapper user-message-wrapper"><div class="user-message">${userMessage}</div></div>`;
+          chatHistory.innerHTML += `<div class="message-wrapper bot-message-wrapper"><div class="bot-message">${botMessage}</div></div>`;
 
           // Scroll to the bottom of the chat history
           chatHistory.scrollTop = chatHistory.scrollHeight;
